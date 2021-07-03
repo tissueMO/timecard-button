@@ -1,4 +1,4 @@
-const uuid = require('node-uuid');
+const { v4: uuidv4 } = require('uuid');
 const generatePassword = require('generate-password');
 const aws = require('aws-sdk');
 const ssm = new aws.SSM();
@@ -78,7 +78,7 @@ module.exports.createUser = async (event) => {
   }
 
   // APIキーを発行し、データベースに書き込む
-  const apiKey = uuid.v4();
+  const apiKey = uuidv4();
   await dynamodb.put({
     TableName: 'users',
     Item: {
