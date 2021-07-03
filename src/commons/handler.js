@@ -28,12 +28,7 @@ module.exports.provisionUser = async (event) => {
     Protocol: 'email',
     Endpoint: email,
     Attributes: {
-      FilterPolicy: {
-        to: {
-          Type: 'String',
-          Value: email,
-        },
-      },
+      FilterPolicy: `{ "to": ["${email}"] }`,
     },
     ReturnSubscriptionArn: true,
   }).promise()).SubscriptionArn;
