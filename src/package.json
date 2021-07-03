@@ -6,7 +6,8 @@
   "author": "tissueMO",
   "license": "MIT",
   "private": true,
-  "devDependencies": {
+  "dependencies": {
+    "axios": "^0.21.1",
     "js-yaml": "^4.1.0",
     "node-jose": "^2.0.0"
   }
