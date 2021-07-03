@@ -1,0 +1,13 @@
+{
+  "name": "timecard-manager",
+  "version": "1.0.0",
+  "main": "handler.js",
+  "repository": "https://github.com/tissueMO/timecard-button.git",
+  "author": "tissueMO",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "js-yaml": "^4.1.0",
+    "node-jose": "^2.0.0"
+  }
+}
