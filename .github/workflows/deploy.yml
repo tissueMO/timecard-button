@@ -32,5 +32,5 @@ jobs:
       - name: Install Node Packages
         run: yarn
 
-      - name: Build and Deploy Backoffice
+      - name: Build and Deploy
         run: yarn release:prod
