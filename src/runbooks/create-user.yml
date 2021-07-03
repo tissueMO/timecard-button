@@ -20,13 +20,19 @@ mainSteps:
   - name: WaitForProvisionUser
     description: ユーザーを新規作成するための事前準備が完了するまで待機します。
     action: 'aws:waitForAwsResourceProperty'
+    timeoutSeconds: 259200
     inputs:
       Service: sns
       Api: GetSubscriptionAttributes
       PropertySelector: $.Attributes.PendingConfirmation
       SubscriptionArn: '{{ ProvisionUser.subscriptionArn }}'
       DesiredValues:
-        - 'False'
+        - 'false'
+  - name: Wait
+    description: 直後の処理との整合性を保つために一定時間待機します。
+    action: 'aws:sleep'
+    inputs:
+      - Duration: PT10S
   - name: CreateUser
     description: ユーザーを新規作成し、初期設定の案内を行います。
     action: 'aws:invokeLambdaFunction'

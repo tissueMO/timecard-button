@@ -47,7 +47,7 @@ module.exports.isProvisionedUser = async (event) => {
 
   const subscriptionArn = (await sns.listSubscriptionsByTopic({ TopicArn: snsTopic }).promise())
     .Subscriptions
-    .filter(subscription => subscription.Endpoint === email)
+    .find(subscription => subscription.Endpoint === email)
     .SubscriptionArn;
 
   const provisioned = subscriptionArn !== 'PendingConfirmation';
