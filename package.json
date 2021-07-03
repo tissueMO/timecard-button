@@ -17,14 +17,14 @@
     "serverless-s3-sync": "^1.17.1"
   },
   "scripts": {
-    "dev": "sls offline --host 0.0.0.0 --httpsProtocol .certs",
+    "dev": "cd src && sls offline --host 0.0.0.0 --httpsProtocol .certs",
     "dev:db": "run-s db:init db:start",
-    "db:init": "sls dynamodb install",
-    "db:start": "sls dynamodb start",
+    "db:init": "cd src && sls dynamodb install",
+    "db:start": "cd src && sls dynamodb start",
     "build:prod": "run-s build:prod:frontend",
     "build:prod:frontend": "docker-compose run frontend yarn build && docker cp `docker-compose ps -a -q frontend`:/app/dist src/",
     "deploy:prod": "cd src && sls deploy -v --stage prod",
     "release:prod": "run-s build:prod deploy:prod",
-    "undeploy:prod": "sls remove -v --stage prod"
+    "destroy:prod": "cd src && sls remove -v --stage prod"
   }
 }
