@@ -532,7 +532,6 @@ definitions:
     required:
       - email
       - username
-      - api_key
       - has_password
   SetPassword:
     title: SetPassword
