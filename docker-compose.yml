@@ -1,0 +1,30 @@
+version: '3'
+services:
+  frontend:
+    build:
+      dockerfile: frontend.Dockerfile
+      context: .
+    ports:
+      - 8080:8080
+  backend:
+    build:
+      dockerfile: backend.Dockerfile
+      context: .
+    tty: true
+    command: yarn dev
+    ports:
+      - 3000:3000
+    volumes:
+      - ./.aws:/home/node/.aws
+      - ./src:/app
+  db:
+    build:
+      dockerfile: backend.Dockerfile
+      context: .
+    tty: true
+    command: yarn dev:db
+    ports:
+      - 8000:8000
+    volumes:
+      - ./.aws:/home/node/.aws
+      - ./src:/app

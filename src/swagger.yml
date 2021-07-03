@@ -1,0 +1,556 @@
+swagger: '2.0'
+info:
+  title: swagger
+  version: '1.0'
+  description: ''
+schemes:
+  - https
+produces:
+  - application/json
+consumes:
+  - application/json
+paths:
+  /signin:
+    get:
+      summary: サインイン
+      description: サインインを行います。
+      operationId: signIn
+      parameters:
+        - name: redirect_url
+          in: query
+          required: false
+          type: string
+          description: サインイン成功後のリダイレクト先URL
+      responses:
+        '302':
+          description: 302 response
+      x-amazon-apigateway-integration:
+        type: AWS_PROXY
+        httpMethod: GET
+        uri:
+          'Fn::GetAtt':
+            - SignInLambdaFunction
+            - Arn
+    options:
+      responses:
+        '200':
+          description: 200 response
+          schema:
+            $ref: '#/definitions/Empty'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+      x-amazon-apigateway-integration:
+        type: MOCK
+        passthroughBehavior: when_no_templates
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: '''GET,OPTIONS'''
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,Authorization'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+  /signout:
+    post:
+      summary: サインアウト
+      description: サインアウトを行います。
+      operationId: signOut
+      responses:
+        '204':
+          description: 204 response
+          schema:
+            $ref: '#/definitions/Empty'
+      security:
+        - Cognito: []
+      x-amazon-apigateway-integration:
+        type: AWS_PROXY
+        httpMethod: POST
+        uri:
+          'Fn::GetAtt':
+            - SignOutLambdaFunction
+            - Arn
+    options:
+      responses:
+        '200':
+          description: 200 response
+          schema:
+            $ref: '#/definitions/Empty'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+      x-amazon-apigateway-integration:
+        type: MOCK
+        passthroughBehavior: when_no_templates
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: '''POST,OPTIONS'''
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,Authorization'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+  /oauth2callback:
+    get:
+      summary: 外部認証コールバック
+      description: 外部認証の結果を適切に処理し、ログインされた状態にします。
+      operationId: oauth2Callback
+      parameters:
+        - name: state
+          in: query
+          required: false
+          type: string
+          description: リレーステート
+        - name: code
+          in: query
+          required: true
+          type: string
+          description: 認証コード
+      responses:
+        '302':
+          description: 302 response
+      x-amazon-apigateway-integration:
+        type: AWS_PROXY
+        httpMethod: GET
+        uri:
+          'Fn::GetAtt':
+            - OAauth2CallbackLambdaFunction
+            - Arn
+    options:
+      responses:
+        '200':
+          description: 200 response
+          schema:
+            $ref: '#/definitions/Empty'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+      x-amazon-apigateway-integration:
+        type: MOCK
+        passthroughBehavior: when_no_templates
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: '''GET,OPTIONS'''
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,Authorization'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+  /swagger.json:
+    get:
+      summary: API仕様取得
+      description: APIサーバーでサポートされているAPI仕様を取得します。
+      operationId: swagger
+      responses:
+        '200':
+          description: 200 response
+          schema:
+            $ref: '#/definitions/Empty'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+      security:
+        - Cognito: []
+      x-amazon-apigateway-integration:
+        type: AWS_PROXY
+        httpMethod: GET
+        uri:
+          'Fn::GetAtt':
+            - SwaggerLambdaFunction
+            - Arn
+    options:
+      responses:
+        '200':
+          description: 200 response
+          schema:
+            $ref: '#/definitions/Empty'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+      x-amazon-apigateway-integration:
+        type: MOCK
+        passthroughBehavior: when_no_templates
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: '''GET,OPTIONS'''
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,Authorization'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+  /viron:
+    get:
+      summary: Vironグローバルメニュー取得
+      description: Vironで必要となるグローバルメニューの情報を取得します。
+      operationId: viron
+      responses:
+        '200':
+          description: 200 response
+          schema:
+            $ref: '#/definitions/Viron'
+      security:
+        - Cognito: []
+      x-amazon-apigateway-integration:
+        type: AWS_PROXY
+        httpMethod: GET
+        uri:
+          'Fn::GetAtt':
+            - VironLambdaFunction
+            - Arn
+    options:
+      responses:
+        '200':
+          description: 200 response
+          schema:
+            $ref: '#/definitions/Empty'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+      x-amazon-apigateway-integration:
+        type: MOCK
+        passthroughBehavior: when_no_templates
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: '''GET,OPTIONS'''
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,Authorization'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+  /viron_authtype:
+    get:
+      summary: Viron認証方式取得
+      description: Vironで使用できる認証方式を取得します。
+      operationId: vironAuthType
+      responses:
+        '200':
+          description: 200 response
+          schema:
+            $ref: '#/definitions/AuthTypeCollection'
+      x-amazon-apigateway-integration:
+        type: AWS_PROXY
+        httpMethod: GET
+        uri:
+          'Fn::GetAtt':
+            - VironAuthTypeLambdaFunction
+            - Arn
+    options:
+      responses:
+        '200':
+          description: 200 response
+          schema:
+            $ref: '#/definitions/Empty'
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+      x-amazon-apigateway-integration:
+        type: MOCK
+        passthroughBehavior: when_no_templates
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Methods: '''GET,OPTIONS'''
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,Authorization'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+  /user:
+    get:
+      summary: ログインユーザー取得
+      tags:
+        - user
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/UserCollection'
+      operationId: getUser
+      description: ログインユーザー情報を取得します。
+    parameters: []
+  '/user/{email}':
+    parameters:
+      - type: string
+        name: email
+        in: path
+        required: true
+        description: メールアドレス
+    put:
+      summary: 勤怠システムパスワード登録
+      operationId: setPassword
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Empty'
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/SetPassword'
+          description: 登録内容
+      tags:
+        - user
+      description: 勤怠システムのパスワードを登録します。
+definitions:
+  Empty:
+    type: object
+    title: Empty Schema
+    description: 任意のスキーマ
+  Viron:
+    type: object
+    description: Vironグローバルメニュー
+    properties:
+      color:
+        type: string
+        enum:
+          - white
+          - black
+          - purple
+          - blue
+          - green
+          - yellow
+          - red
+          - gray
+        default: white
+        description: ドットカラー
+      theme:
+        type: string
+        enum:
+          - standard
+          - midnight
+          - terminal
+        default: standard
+        description: カラーテーマ
+      name:
+        type: string
+        description: エンドポイント名
+      pages:
+        type: array
+        description: グローバルメニュー
+        items:
+          $ref: '#/definitions/Page'
+      tags:
+        type: array
+        description: エンドポイントに付与するタグ
+        items:
+          type: string
+      thumbnail:
+        type: string
+        description: サムネイルURL
+    required:
+      - color
+      - name
+      - pages
+      - tags
+      - thumbnail
+  AuthTypeCollection:
+    type: array
+    items:
+      $ref: '#/definitions/AuthType'
+    title: ''
+    description: Viron認証方式コレクション
+  Page:
+    type: object
+    description: Vironページ
+    properties:
+      components:
+        type: array
+        description: コンポーネント
+        items:
+          $ref: '#/definitions/Component'
+      group:
+        type: string
+        description: グループ
+      id:
+        type: string
+        description: ページID
+      name:
+        type: string
+        description: ページ名
+      section:
+        type: string
+        description: セクション名
+        enum:
+          - manage
+          - dashboard
+        default: manage
+    required:
+      - components
+      - group
+      - id
+      - name
+      - section
+  AuthType:
+    type: object
+    title: AuthType
+    description: Viron認証方式
+    properties:
+      method:
+        type: string
+        description: リクエストメソッド
+      provider:
+        type: string
+        description: 認証プロバイダー
+      type:
+        type: string
+        description: 認証方式
+      url:
+        type: string
+        description: リクエストURL
+    required:
+      - method
+      - provider
+      - type
+      - url
+  Component:
+    type: object
+    required:
+      - api
+      - name
+      - pagination
+      - style
+    properties:
+      api:
+        type: object
+        properties:
+          method:
+            type: string
+            description: リクエストメソッド
+          path:
+            type: string
+            description: リクエストパス
+        required:
+          - method
+          - path
+      name:
+        type: string
+        description: ページタイトル
+      options:
+        type: array
+        description: オプション
+        items:
+          type: object
+          properties:
+            key:
+              type: string
+              description: オプション キー名
+            value:
+              type: string
+              description: オプション 値
+          required:
+            - key
+            - value
+      pagination:
+        type: boolean
+        description: ページネーション
+      query:
+        type: array
+        description: クエリパラメータ
+        items:
+          type: object
+          properties:
+            key:
+              type: string
+              description: クエリパラメータ キー名
+            type:
+              type: string
+              description: クエリパラメータ 型
+              enum:
+                - string
+                - integer
+                - number
+                - boolean
+                - date
+                - datetime
+                - time
+              default: string
+          required:
+            - key
+            - type
+      style:
+        type: string
+        description: コンポーネントスタイル
+        enum:
+          - number
+          - list
+          - table
+          - chart
+        default: number
+      table_labels:
+        type: array
+        description: テーブル列 表示順
+        items:
+          type: string
+    description: Vironコンポーネント
+  User:
+    title: User
+    type: object
+    description: ユーザー
+    properties:
+      email:
+        type: string
+        description: メールアドレス
+      api_key:
+        type: string
+        description: APIキー
+      username:
+        type: string
+        description: 勤怠ユーザー名
+      has_password:
+        type: boolean
+        description: 勤怠パスワード登録済み
+    required:
+      - email
+      - username
+      - api_key
+      - has_password
+  SetPassword:
+    title: SetPassword
+    type: object
+    properties:
+      username:
+        type: string
+        description: 勤怠システムのユーザー名
+      password:
+        type: string
+        description: 勤怠システムのパスワード
+    required:
+      - username
+      - password
+    description: 勤怠システムパスワード
+  UserCollection:
+    title: UserCollection
+    type: array
+    items:
+      $ref: '#/definitions/User'
+    description: ユーザーコレクション

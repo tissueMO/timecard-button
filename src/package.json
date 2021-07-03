@@ -1,0 +1,30 @@
+{
+  "name": "timecard-button",
+  "version": "1.0.0",
+  "main": "handler.js",
+  "repository": "https://github.com/tissueMO/timecard-button.git",
+  "author": "tissueMO",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "js-yaml": "^4.1.0",
+    "node-jose": "^2.0.0",
+    "npm-run-all": "^4.1.5",
+    "serverless": "^2.50.0",
+    "serverless-dynamodb-local": "^0.2.40",
+    "serverless-offline": "^7.0.0",
+    "serverless-pseudo-parameters": "^2.5.0",
+    "serverless-s3-sync": "^1.17.1"
+  },
+  "scripts": {
+    "dev": "sls offline --host 0.0.0.0 --httpsProtocol .certs",
+    "dev:db": "run-s db:init db:start",
+    "db:init": "sls dynamodb install",
+    "db:start": "sls dynamodb start",
+    "build:prod": "run-s build:prod:frontend",
+    "build:prod:frontend": "docker-compose run frontend yarn build && docker cp `docker-compose ps -a -q frontend`:/app/dist src/",
+    "deploy:prod": "cd src && sls deploy -v --stage prod",
+    "release:prod": "run-s build:prod deploy:prod",
+    "undeploy:prod": "sls remove -v --stage prod"
+  }
+}
