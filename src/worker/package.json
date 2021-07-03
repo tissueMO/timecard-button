@@ -1,0 +1,7 @@
+{
+  "name": "timecard-worker",
+  "version": "1.0.0",
+  "main": "handler.js",
+  "license": "MIT",
+  "private": true
+}
