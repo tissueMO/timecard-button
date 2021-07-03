@@ -1,0 +1,37 @@
+description: タイムカードボタンの新規利用手続きを行います。
+schemaVersion: '0.3'
+parameters:
+  email:
+    type: String
+    description: 登録するユーザーのメールアドレス
+mainSteps:
+  - name: ProvisionUser
+    description: ユーザーを新規作成するための事前準備を行います。
+    action: 'aws:invokeLambdaFunction'
+    outputs:
+      - Name: subscriptionArn
+        Selector: $.subscriptionArn
+        Type: String
+    inputs:
+      FunctionName:
+        Ref: ProvisionUserLambdaFunction
+      InputPayload:
+        email: '{{ email }}'
+  - name: WaitForProvisionUser
+    description: ユーザーを新規作成するための事前準備が完了するまで待機します。
+    action: 'aws:waitForAwsResourceProperty'
+    inputs:
+      Service: sns
+      Api: GetSubscriptionAttributes
+      PropertySelector: $.Attributes.PendingConfirmation
+      SubscriptionArn: '{{ ProvisionUser.subscriptionArn }}'
+      DesiredValues:
+        - 'False'
+  - name: CreateUser
+    description: ユーザーを新規作成し、初期設定の案内を行います。
+    action: 'aws:invokeLambdaFunction'
+    inputs:
+      FunctionName:
+        Ref: CreateUserLambdaFunction
+      InputPayload:
+        email: '{{ email }}'

@@ -1,0 +1,15 @@
+description: タイムカードボタンの利用停止手続きを行います。
+schemaVersion: '0.3'
+parameters:
+  email:
+    type: String
+    description: 利用停止するユーザーのメールアドレス
+mainSteps:
+  - name: DeleteUser
+    description: ユーザーを利用停止するための手続きを実行します。
+    action: 'aws:invokeLambdaFunction'
+    inputs:
+      FunctionName:
+        Ref: DeleteUserLambdaFunction
+      InputPayload:
+        email: '{{ email }}'

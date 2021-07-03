@@ -24,13 +24,6 @@ paths:
       responses:
         '302':
           description: 302 response
-      x-amazon-apigateway-integration:
-        type: AWS_PROXY
-        httpMethod: GET
-        uri:
-          'Fn::GetAtt':
-            - SignInLambdaFunction
-            - Arn
     options:
       responses:
         '200':
@@ -68,13 +61,6 @@ paths:
             $ref: '#/definitions/Empty'
       security:
         - Cognito: []
-      x-amazon-apigateway-integration:
-        type: AWS_PROXY
-        httpMethod: POST
-        uri:
-          'Fn::GetAtt':
-            - SignOutLambdaFunction
-            - Arn
     options:
       responses:
         '200':
@@ -119,13 +105,6 @@ paths:
       responses:
         '302':
           description: 302 response
-      x-amazon-apigateway-integration:
-        type: AWS_PROXY
-        httpMethod: GET
-        uri:
-          'Fn::GetAtt':
-            - OAauth2CallbackLambdaFunction
-            - Arn
     options:
       responses:
         '200':
@@ -166,13 +145,6 @@ paths:
               type: string
       security:
         - Cognito: []
-      x-amazon-apigateway-integration:
-        type: AWS_PROXY
-        httpMethod: GET
-        uri:
-          'Fn::GetAtt':
-            - SwaggerLambdaFunction
-            - Arn
     options:
       responses:
         '200':
@@ -210,13 +182,6 @@ paths:
             $ref: '#/definitions/Viron'
       security:
         - Cognito: []
-      x-amazon-apigateway-integration:
-        type: AWS_PROXY
-        httpMethod: GET
-        uri:
-          'Fn::GetAtt':
-            - VironLambdaFunction
-            - Arn
     options:
       responses:
         '200':
@@ -252,13 +217,6 @@ paths:
           description: 200 response
           schema:
             $ref: '#/definitions/AuthTypeCollection'
-      x-amazon-apigateway-integration:
-        type: AWS_PROXY
-        httpMethod: GET
-        uri:
-          'Fn::GetAtt':
-            - VironAuthTypeLambdaFunction
-            - Arn
     options:
       responses:
         '200':
@@ -306,7 +264,7 @@ paths:
         description: メールアドレス
     put:
       summary: 勤怠システム接続設定
-      operationId: setPassword
+      operationId: updateUser
       responses:
         '200':
           description: OK

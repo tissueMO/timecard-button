@@ -23,7 +23,7 @@ const dynamodb = new aws.DynamoDB.DocumentClient(dbRegion ? {
 module.exports.provisionUser = async (event) => {
   const email = event.email;
 
-  await sns.subscribe({
+  const subscriptionArn = (await sns.subscribe({
     TopicArn: snsTopic,
     Protocol: 'email',
     Endpoint: email,
@@ -35,9 +35,13 @@ module.exports.provisionUser = async (event) => {
         },
       },
     },
-  }).promise();
+    ReturnSubscriptionArn: true,
+  }).promise()).SubscriptionArn;
 
-  return { statusCode: 200 };
+  return {
+    statusCode: 200,
+    subscriptionArn,
+  };
 };
 
 /**
