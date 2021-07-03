@@ -8,7 +8,9 @@
   "private": true,
   "dependencies": {
     "axios": "^0.21.1",
+    "generate-password": "^1.6.0",
     "js-yaml": "^4.1.0",
-    "node-jose": "^2.0.0"
+    "node-jose": "^2.0.0",
+    "node-uuid": "^1.4.8"
   }
 }
