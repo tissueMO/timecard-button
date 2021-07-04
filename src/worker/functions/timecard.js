@@ -8,6 +8,7 @@ module.exports = {
    */
   timecard: async (page) => {
     // タイムカードページへ移動
+    console.log('Chromium: タイムカードページへ遷移します...');
     const sideFrameElement = await page.$('frame[name="oldmenuFrame"]');
     const sideFrame = await sideFrameElement.contentFrame();
     await sideFrame.click('a[href="./work/registtimeend1.asp"]');
@@ -17,6 +18,7 @@ module.exports = {
     await bodyFrame.waitForLoadState('load');
 
     // タイムカード打刻
+    console.log('Chromium: タイムカードを打刻します...');
     const buttons = await bodyFrame.$$('a[id="today"]');
     if (!buttons.length) {
       await page.screenshot({ path: './error-timecard.png' });

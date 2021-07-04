@@ -64,6 +64,8 @@ module.exports.executeTimecard = async (event) => {
   };
 
   try {
+    console.info('タイムカードの打刻操作を開始します...', email, options.username, options.password[0]);
+
     const timecardResult = await executeOnKintai(timecard, options);
 
     console.info(`タイムカード【${timecardResult}】打刻しました:`, email);
@@ -126,6 +128,7 @@ const executeOnKintai = async (callback, options) => {
   // 勤怠システムにアクセス
   const browser = await chromium.launch({
     // Dockerコンテナー型のLambda関数における制約の対策
+    executablePath: getCustomExecutablePath(chromium.executablePath()),
     args: [ '--single-process' ],
   });
   const context = await browser.newContext({
@@ -133,25 +136,40 @@ const executeOnKintai = async (callback, options) => {
     viewport: { width: 1920, height: 1080 },
   });
   const page = await context.newPage();
+  console.log('Chromium: ログインページへ遷移します...');
   await page.goto(kintaiUrl);
 
   // ログイン
+  console.log('Chromium: ログインします...');
   (await page.$('input[name="username"]')).fill(username);
   (await page.$('input[name="password"]')).fill(password);
   await page.click('input[name="submit1"]');
 
   // 共通フレームページへ
+  console.log('Chromium: 共通フレームページへ遷移します...');
   await page.goto(`${kintaiUrl}/common/mainframe.asp`);
 
   // 任意の処理を実行
+  console.log('Chromium: 任意の処理を実行します...');
   let result = null;
   if (callback) {
     result = await callback(page, options);
   }
 
   // ログアウト
+  console.log('Chromium: ログアウトします...');
   await page.goto(`${kintaiUrl}/common/logout.asp`);
   await browser.close();
 
   return result;
 };
+
+/**
+ * Dockerイメージビルド時点で確定しているブラウザーの実行可能パスを返します。
+ * @param {*} expectedPath ブラウザーの標準実行パス
+ * @returns {string}
+ */
+const getCustomExecutablePath = (expectedPath) => {
+    const suffix = expectedPath.split('/.cache/ms-playwright/')[1];
+    return  `/home/pwuser/.cache/ms-playwright/${suffix}`;
+}
