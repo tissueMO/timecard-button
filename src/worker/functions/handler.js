@@ -128,6 +128,7 @@ const executeOnKintai = async (callback, options) => {
   // 勤怠システムにアクセス
   const browser = await chromium.launch({
     // Dockerコンテナー型のLambda関数における制約の対策
+    executablePath: getCustomExecutablePath(chromium.executablePath()),
     args: [ '--single-process' ],
   });
   const context = await browser.newContext({
@@ -162,3 +163,14 @@ const executeOnKintai = async (callback, options) => {
 
   return result;
 };
+
+/**
+ * Dockerイメージビルド時点で確定しているブラウザーの実行可能パスを返します。
+ * @param {*} expectedPath ブラウザーの標準実行パス
+ * @returns {string}
+ */
+const getCustomExecutablePath = (expectedPath) => {
+  console.log('expectedPath:', expectedPath);
+  const suffix = expectedPath.split('/.cache/ms-playwright/')[1];
+  return `/home/pwuser/.cache/ms-playwright/${suffix}`;
+}
