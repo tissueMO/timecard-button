@@ -64,12 +64,13 @@ module.exports.executeTimecard = async (event) => {
   };
 
   try {
-    const result = await executeOnKintai(timecard, options);
+    const timecardResult = await executeOnKintai(timecard, options);
 
-    await sns.publish({
+    console.info(`タイムカード【${timecardResult}】打刻しました:`, email);
+    const publishResult = await sns.publish({
       TopicArn: snsTopic,
-      Subject: `【${result}】タイムカード打刻完了`,
-      Message: `タイムカード【${result}】打刻しました。\n`,
+      Subject: `【${timecardResult}】タイムカード打刻完了`,
+      Message: `タイムカード【${timecardResult}】打刻しました。\n`,
       MessageAttributes: {
         to: {
           DataType: 'String',
@@ -77,10 +78,11 @@ module.exports.executeTimecard = async (event) => {
         },
       },
     }).promise();
+    console.log(publishResult);
 
     const result = {
       statusCode: 200,
-      result,
+      result: timecardResult,
     };
     console.info(result);
     return result;
@@ -88,7 +90,7 @@ module.exports.executeTimecard = async (event) => {
   } catch (e) {
     console.error(e);
 
-    await sns.publish({
+    const publishResult = await sns.publish({
       TopicArn: snsTopic,
       Subject: 'タイムカード打刻失敗',
       Message:
@@ -101,6 +103,7 @@ module.exports.executeTimecard = async (event) => {
         },
       },
     }).promise();
+    console.log(publishResult);
 
     const result = {
       statusCode: 500,
