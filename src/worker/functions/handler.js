@@ -64,7 +64,7 @@ module.exports.executeTimecard = async (event) => {
   };
 
   try {
-    console.info('タイムカードの打刻操作を開始します...', email, options.username, options.password[0]);
+    console.info('タイムカードの打刻操作を開始します...', email, options.username);
 
     const timecardResult = await executeOnKintai(timecard, options);
 
@@ -128,7 +128,6 @@ const executeOnKintai = async (callback, options) => {
   // 勤怠システムにアクセス
   const browser = await chromium.launch({
     // Dockerコンテナー型のLambda関数における制約の対策
-    executablePath: getCustomExecutablePath(chromium.executablePath()),
     args: [ '--single-process' ],
   });
   const context = await browser.newContext({
@@ -163,13 +162,3 @@ const executeOnKintai = async (callback, options) => {
 
   return result;
 };
-
-/**
- * Dockerイメージビルド時点で確定しているブラウザーの実行可能パスを返します。
- * @param {*} expectedPath ブラウザーの標準実行パス
- * @returns {string}
- */
-const getCustomExecutablePath = (expectedPath) => {
-    const suffix = expectedPath.split('/.cache/ms-playwright/')[1];
-    return  `/home/pwuser/.cache/ms-playwright/${suffix}`;
-}
