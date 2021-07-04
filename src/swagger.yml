@@ -295,6 +295,7 @@ paths:
   /timecard:
     post:
       summary: タイムカード打刻
+      description: タイムカードを打刻します。
       operationId: timecard
       responses:
         '200':
@@ -302,12 +303,27 @@ paths:
         '500':
           description: Internal Server Error
           schema: {}
-      description: タイムカードを打刻します。
+  '/timecard/{api_key}':
+    post:
+      summary: タイムカード打刻
+      description: APIキーを使用してタイムカードを打刻します。
+      operationId: timecardByApiKey
       parameters:
         - in: body
           name: body
-          schema:
-            $ref: '#/definitions/Timecard'
+          schema: {}
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error
+          schema: {}
+    parameters:
+      - type: string
+        name: api_key
+        in: path
+        required: true
+        description: APIキー
 definitions:
   Empty:
     type: object
@@ -542,5 +558,9 @@ definitions:
     type: object
     description: タイムカード打刻
     properties:
+      email:
+        type: string
+        description: メールアドレス
       api_key:
         type: string
+        description: APIキー

@@ -1,5 +1,4 @@
-const chromium = require('chrome-aws-lambda');
-const playwright = require('playwright');
+const playwright = require('playwright-aws-lambda');
 const { timecard } = require('./timecard');
 const aws = require('aws-sdk');
 const sns = new aws.SNS();
@@ -128,11 +127,7 @@ const executeOnKintai = async (callback, options) => {
 
   // 勤怠システムにアクセス
   console.log('Chromium: ヘッドレスブラウザーを初期化します...');
-  const browser = await playwright.chromium.launch({
-    args: chromium.args,
-    executablePath: await chromium.executablePath,
-    headless: chromium.headless,
-  });
+  const browser = await playwright.launchChromium();
   const context = await browser.newContext({
     locale: 'ja',
     viewport: { width: 1920, height: 1080 },

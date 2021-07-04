@@ -11,6 +11,8 @@
     "generate-password": "^1.6.0",
     "js-yaml": "^4.1.0",
     "node-jose": "^2.0.0",
+    "playwright-aws-lambda": "^0.7.0",
+    "playwright-core": "^1.12.3",
     "uuid": "^8.3.2"
   }
 }

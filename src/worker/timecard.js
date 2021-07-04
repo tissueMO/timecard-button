@@ -1,4 +1,4 @@
-const { Page } = require('playwright');
+const { Page } = require('playwright-core');
 
 module.exports = {
   /**
