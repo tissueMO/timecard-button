@@ -26,28 +26,36 @@ module.exports.executeTimecard = async (event) => {
   }).promise())?.Item;
 
   if (!user) {
-    return {
+    const result = {
       statusCode: 400,
-      body: `データベースに登録されていないユーザーを削除しようとしました: ${email}`,
+      body: `データベースに登録されていないユーザーでタイムカードを打刻しようとしました: ${email}`,
     };
+    console.error(result);
+    return result;
   }
+
   if (user.api_key !== apiKey) {
-    return {
+    const result = {
       statusCode: 400,
       body: `APIキーが不正です: (${email}) ${apiKey}`,
     };
+    console.error(result);
+    return result;
   }
 
-  const password = await ssm.getParameter({
+  // 【取扱注意】勤怠システムのパスワードを取得
+  const password = (await ssm.getParameter({
     Name: user.kintai_password_ssm_parameter_name,
     WithDecryption: true,
-  }).promise()?.Parameter?.Value;
+  }).promise())?.Parameter?.Value;
 
   if (!password) {
-    return {
+    const result = {
       statusCode: 400,
       body: `勤怠システムのパスワードが登録されていません: ${email}`,
     };
+    console.error(result);
+    return result;
   }
 
   const options = {
@@ -70,10 +78,12 @@ module.exports.executeTimecard = async (event) => {
       },
     }).promise();
 
-    return {
+    const result = {
       statusCode: 200,
       result,
     };
+    console.info(result);
+    return result;
 
   } catch (e) {
     console.error(e);
@@ -92,10 +102,12 @@ module.exports.executeTimecard = async (event) => {
       },
     }).promise();
 
-    return {
+    const result = {
       statusCode: 500,
       error: e,
     };
+    console.error(result);
+    return result;
   }
 };
 
