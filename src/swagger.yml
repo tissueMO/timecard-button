@@ -292,6 +292,22 @@ paths:
       tags:
         - user
       x-submit-label: 利用停止する
+  /timecard:
+    post:
+      summary: タイムカード打刻
+      operationId: timecard
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error
+          schema: {}
+      description: タイムカードを打刻します。
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: '#/definitions/Timecard'
 definitions:
   Empty:
     type: object
@@ -521,3 +537,10 @@ definitions:
     items:
       $ref: '#/definitions/User'
     description: ユーザーコレクション
+  Timecard:
+    title: Timecard
+    type: object
+    description: タイムカード打刻
+    properties:
+      api_key:
+        type: string

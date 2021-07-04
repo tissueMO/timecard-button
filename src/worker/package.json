@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "main": "handler.js",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "playwright": "^1.12.3"
+  }
 }
