@@ -1,4 +1,5 @@
-const { chromium } = require('playwright');
+const chromium = require('chrome-aws-lambda');
+const playwright = require('playwright');
 const { timecard } = require('./timecard');
 const aws = require('aws-sdk');
 const sns = new aws.SNS();
@@ -126,10 +127,11 @@ const executeOnKintai = async (callback, options) => {
   const { username, password } = options;
 
   // 勤怠システムにアクセス
-  const browser = await chromium.launch({
-    // Dockerコンテナー型のLambda関数における制約の対策
-    executablePath: getCustomExecutablePath(chromium.executablePath()),
-    args: [ '--single-process' ],
+  console.log('Chromium: ヘッドレスブラウザーを初期化します...');
+  const browser = await playwright.chromium.launch({
+    args: chromium.args,
+    executablePath: await chromium.executablePath,
+    headless: chromium.headless,
   });
   const context = await browser.newContext({
     locale: 'ja',
@@ -163,14 +165,3 @@ const executeOnKintai = async (callback, options) => {
 
   return result;
 };
-
-/**
- * Dockerイメージビルド時点で確定しているブラウザーの実行可能パスを返します。
- * @param {*} expectedPath ブラウザーの標準実行パス
- * @returns {string}
- */
-const getCustomExecutablePath = (expectedPath) => {
-  console.log('expectedPath:', expectedPath);
-  const suffix = expectedPath.split('/.cache/ms-playwright/')[1];
-  return `/home/pwuser/.cache/ms-playwright/${suffix}`;
-}
