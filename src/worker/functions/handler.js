@@ -109,7 +109,10 @@ const executeOnKintai = async (callback, options) => {
   const { username, password } = options;
 
   // 勤怠システムにアクセス
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({
+    // Dockerコンテナー型のLambda関数における制約の対策
+    args: [ '--single-process' ],
+  });
   const context = await browser.newContext({
     locale: 'ja',
     viewport: { width: 1920, height: 1080 },
