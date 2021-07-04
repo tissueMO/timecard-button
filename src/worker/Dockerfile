@@ -14,16 +14,17 @@ RUN apt-get update -y \
  && echo "ja_JP UTF-8" > /etc/locale.gen && locale-gen
 
 COPY package.json ${FUNCTION_DIR}
-RUN npm install \
+COPY yarn.lock ${FUNCTION_DIR}
+RUN yarn \
  # Lambda RIC をインストール
- && npm install aws-lambda-ric
+ && yarn add aws-lambda-ric
 
 # ソースコードを配置
 COPY functions/ ${FUNCTION_DIR}
 
 
 # 本番ステージ
-FROM mcr.microsoft.com/playwright:focal AS prod
+FROM mcr.microsoft.com/playwright:focal
 
 ARG FUNCTION_DIR
 WORKDIR ${FUNCTION_DIR}

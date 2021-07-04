@@ -5,6 +5,7 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "aws-sdk": "^2.939.0",
     "playwright": "^1.12.3"
   }
 }
