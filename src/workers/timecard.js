@@ -21,7 +21,7 @@ module.exports = {
     console.log('Chromium: タイムカードを打刻します...');
     const buttons = await bodyFrame.$$('a[id="today"]');
     if (!buttons.length) {
-      await page.screenshot({ path: './error-timecard.png' });
+      // await page.screenshot({ path: './error-timecard.png' });
       throw 'タイムカード画面に押下できるボタンがありません。';
     }
 
