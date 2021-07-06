@@ -127,7 +127,6 @@ const executeOnKintai = async (callback, options) => {
 
   // 勤怠システムにアクセス
   console.log('Chromium: ヘッドレスブラウザーを初期化します...');
-  await playwright.loadFont('../NotoSansJP-Regular.otf');
   const browser = await playwright.launchChromium();
   const context = await browser.newContext({
     locale: 'ja',
