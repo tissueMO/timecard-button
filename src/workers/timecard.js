@@ -15,11 +15,11 @@ module.exports = {
     const sideFrameElement = await page.$('frame[name="oldmenuFrame"]');
     const sideFrame = await sideFrameElement.contentFrame();
     await sideFrame.click('a[href="./work/registtimeend1.asp"]');
-    await sideFrame.waitForNavigation();
 
     const bodyFrameElement = await page.$('frame[name="bodyFrame"]');
     const bodyFrame = await bodyFrameElement.contentFrame();
-    await bodyFrame.waitForNavigation()
+    await bodyFrame.waitForNavigation({ waitUntil: ['load', 'networkidle2'] });
+    // await bodyFrame.waitForLoadState('load');
 
     // タイムカード打刻
     console.log('Chromium: タイムカードを打刻します...');
@@ -45,7 +45,7 @@ module.exports = {
     // // 画面が更新されるのを待つ
     // const newBodyFrameElement = await page.$('frame[name="bodyFrame"]');
     // const newBodyFrame = await newBodyFrameElement.contentFrame();
-    // await newBodyFrame.waitForNavigation()
+    // await newBodyFrame.waitForNavigation({ waitUntil: ['load', 'networkidle2'] });
     // await newBodyFrame.waitForSelector('a[id="today"]');
 
     return command;
