@@ -1,4 +1,7 @@
 const { Page } = require('playwright-core');
+const aws = require('aws-sdk');
+const s3 = new aws.S3();
+const fs = require('fs').promises;
 
 module.exports = {
   /**
@@ -7,11 +10,14 @@ module.exports = {
    * @returns {string}
    */
   timecard: async (page) => {
+    await screenshot(page, 'page01.png');
+
     // タイムカードページへ移動
     console.log('Chromium: タイムカードページへ遷移します...');
     const sideFrameElement = await page.$('frame[name="oldmenuFrame"]');
     const sideFrame = await sideFrameElement.contentFrame();
     await sideFrame.click('a[href="./work/registtimeend1.asp"]');
+    await screenshot(page, 'page02.png');
 
     const bodyFrameElement = await page.$('frame[name="bodyFrame"]');
     const bodyFrame = await bodyFrameElement.contentFrame();
@@ -27,20 +33,37 @@ module.exports = {
 
     const command = (buttons.length === 4) ? '出勤' : '退勤';
 
-    if (command === '出勤') {
-      console.info('出勤タイムカードを打刻します。');
-      await buttons.slice(0, 1).pop().click();
-    } else {
-      console.info('退勤タイムカードを打刻します。');
-      await buttons.slice(-1).pop().click();
-    }
+    console.info(`DRYRUN: ${command}`);
 
-    // 画面が更新されるのを待つ
-    const newBodyFrameElement = await page.$('frame[name="bodyFrame"]');
-    const newBodyFrame = await newBodyFrameElement.contentFrame();
-    await newBodyFrame.waitForLoadState('load');
-    await newBodyFrame.waitForSelector('a[id="today"]');
+    // if (command === '出勤') {
+    //   console.info('出勤タイムカードを打刻します。');
+    //   await buttons.slice(0, 1).pop().click();
+    // } else {
+    //   console.info('退勤タイムカードを打刻します。');
+    //   await buttons.slice(-1).pop().click();
+    // }
+
+    // // 画面が更新されるのを待つ
+    // const newBodyFrameElement = await page.$('frame[name="bodyFrame"]');
+    // const newBodyFrame = await newBodyFrameElement.contentFrame();
+    // await newBodyFrame.waitForLoadState('load');
+    // await newBodyFrame.waitForSelector('a[id="today"]');
 
     return command;
   },
+};
+
+/**
+ * [TEMP] スクリーンショットを取得し、S3にアップロードします。
+ * @param {Page} page
+ * @param {string} key
+ */
+const screenshot = async (page, key) => {
+  const path = `/tmp/${key}`;
+  await page.screenshot({ path });
+  await s3.putObject({
+    Bucket: 'timecard-manager-prod',
+    Key: key,
+    Body: await fs.readFile(path),
+  }).promise();
 };
