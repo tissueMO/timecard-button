@@ -16,12 +16,10 @@ module.exports = {
     const sideFrame = await sideFrameElement.contentFrame();
     await sideFrame.click('a[href="./work/registtimeend1.asp"]');
     await sideFrame.waitForNavigation();
-    await page.waitForNavigation();
 
     const bodyFrameElement = await page.$('frame[name="bodyFrame"]');
     const bodyFrame = await bodyFrameElement.contentFrame();
     await bodyFrame.waitForNavigation()
-    await page.waitForNavigation();
 
     // タイムカード打刻
     console.log('Chromium: タイムカードを打刻します...');
