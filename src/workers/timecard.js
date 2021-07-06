@@ -18,7 +18,7 @@ module.exports = {
 
     const bodyFrameElement = await page.$('frame[name="bodyFrame"]');
     const bodyFrame = await bodyFrameElement.contentFrame();
-    await bodyFrame.waitForNavigation({ waitUntil: ['load', 'networkidle2'] });
+    await bodyFrame.waitForNavigation({ waitUntil: 'load' });
     // await bodyFrame.waitForLoadState('load');
 
     // タイムカード打刻
@@ -45,7 +45,7 @@ module.exports = {
     // // 画面が更新されるのを待つ
     // const newBodyFrameElement = await page.$('frame[name="bodyFrame"]');
     // const newBodyFrame = await newBodyFrameElement.contentFrame();
-    // await newBodyFrame.waitForNavigation({ waitUntil: ['load', 'networkidle2'] });
+    // await newBodyFrame.waitForNavigation({ waitUntil: 'load' });
     // await newBodyFrame.waitForSelector('a[id="today"]');
 
     return command;
