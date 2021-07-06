@@ -10,14 +10,11 @@ module.exports = {
    * @returns {string}
    */
   timecard: async (page) => {
-    await screenshot(page, 'page01.png');
-
     // タイムカードページへ移動
     console.log('Chromium: タイムカードページへ遷移します...');
     const sideFrameElement = await page.$('frame[name="oldmenuFrame"]');
     const sideFrame = await sideFrameElement.contentFrame();
     await sideFrame.click('a[href="./work/registtimeend1.asp"]');
-    await screenshot(page, 'page02.png');
 
     const bodyFrameElement = await page.$('frame[name="bodyFrame"]');
     const bodyFrame = await bodyFrameElement.contentFrame();
@@ -26,8 +23,9 @@ module.exports = {
     // タイムカード打刻
     console.log('Chromium: タイムカードを打刻します...');
     const buttons = await bodyFrame.$$('a[id="today"]');
+    await screenshot(page, 'timecard.png');
     if (!buttons.length) {
-      // await page.screenshot({ path: './error-timecard.png' });
+      await screenshot(page, 'error-timecard.png');
       throw 'タイムカード画面に押下できるボタンがありません。';
     }
 
@@ -54,7 +52,7 @@ module.exports = {
 };
 
 /**
- * [TEMP] スクリーンショットを取得し、S3にアップロードします。
+ * [DEBUG] スクリーンショットを取得し、S3にアップロードします。
  * @param {Page} page
  * @param {string} key
  */
