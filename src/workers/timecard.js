@@ -19,12 +19,10 @@ module.exports = {
     const bodyFrameElement = await page.$('frame[name="bodyFrame"]');
     const bodyFrame = await bodyFrameElement.contentFrame();
     await bodyFrame.waitForNavigation({ waitUntil: 'load' });
-    // await bodyFrame.waitForLoadState('load');
 
     // タイムカード打刻
     console.log('Chromium: タイムカードを打刻します...');
     const buttons = await bodyFrame.$$('a[id="today"]');
-    await screenshot(page, 'timecard.png');
     if (!buttons.length) {
       await screenshot(page, 'error-timecard.png');
       throw 'タイムカード画面に押下できるボタンがありません。';
@@ -32,21 +30,18 @@ module.exports = {
 
     const command = (buttons.length === 4) ? '出勤' : '退勤';
 
-    console.info(`DRYRUN: ${command}`);
+    if (command === '出勤') {
+      console.info('出勤タイムカードを打刻します。');
+      await buttons.slice(0, 1).pop().click();
+    } else {
+      console.info('退勤タイムカードを打刻します。');
+      await buttons.slice(-1).pop().click();
+    }
 
-    // if (command === '出勤') {
-    //   console.info('出勤タイムカードを打刻します。');
-    //   await buttons.slice(0, 1).pop().click();
-    // } else {
-    //   console.info('退勤タイムカードを打刻します。');
-    //   await buttons.slice(-1).pop().click();
-    // }
-
-    // // 画面が更新されるのを待つ
-    // const newBodyFrameElement = await page.$('frame[name="bodyFrame"]');
-    // const newBodyFrame = await newBodyFrameElement.contentFrame();
-    // await newBodyFrame.waitForNavigation({ waitUntil: 'load' });
-    // await newBodyFrame.waitForSelector('a[id="today"]');
+    // 画面が更新されるのを待つ
+    const newBodyFrameElement = await page.$('frame[name="bodyFrame"]');
+    const newBodyFrame = await newBodyFrameElement.contentFrame();
+    await newBodyFrame.waitForNavigation({ waitUntil: 'load' });
 
     return command;
   },
