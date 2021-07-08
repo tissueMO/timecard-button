@@ -1,0 +1,406 @@
+service: timecard-manager
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  region: ap-northeast-1
+  stage: ${opt:stage, self:custom.defaultStage}
+  runtime: nodejs14.x
+  environment: ${self:custom.environment.${self:provider.stage}}
+  deploymentBucket:
+    name: ${self:service}-${self:provider.stage}
+    blockPublicAccess: true
+    serverSideEncryption: AES256
+  lambdaHashingVersion: 20201221
+  memorySize: 512
+  endpointType: REGIONAL
+  logRetentionInDays: 30
+  iam:
+    role:
+      name:
+        Fn::Sub: ${self:service}-${self:provider.stage}-${AWS::Region}-Role
+      managedPolicies:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+package:
+ patterns:
+   - '!.aws/**'
+   - '!.certs/**'
+   - '!.dynamodb/**'
+   - '!node_modules/**'
+   - '!.gitignore'
+   - '!package.json'
+   - '!yarn.lock'
+   - '!env.*.yml'
+   - '!*.pem'
+   - '!runbooks/**'
+   - '!migrations/**'
+
+functions:
+  VironAuthTypeApi:
+    handler: api/handler.vironAuthType
+    events:
+      - http:
+          path: /viron_authtype
+          method: get
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+  OAauth2CallbackApi:
+    handler: api/handler.oauth2Callback
+    events:
+      - http:
+          path: /oauth2callback
+          method: get
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+  SignInApi:
+    handler: api/handler.signIn
+    events:
+      - http:
+          path: /signin
+          method: get
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+  SingOutApi:
+    handler: api/handler.signOut
+    events:
+      - http:
+          path: /signout
+          method: post
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayCognitoAuthorizer
+  VironApi:
+    handler: api/handler.viron
+    events:
+      - http:
+          path: /viron
+          method: get
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayCognitoAuthorizer
+  SwaggerApi:
+    handler: api/handler.swagger
+    events:
+      - http:
+          path: /swagger.json
+          method: get
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayCognitoAuthorizer
+  GetUserApi:
+    handler: api/handler.getUser
+    events:
+      - http:
+          path: /user
+          method: get
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayCognitoAuthorizer
+  UpdateUserApi:
+    handler: api/handler.updateUser
+    events:
+      - http:
+          path: /user/{email}
+          method: put
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayCognitoAuthorizer
+  DeleteUserApi:
+    handler: api/handler.deleteUser
+    events:
+      - http:
+          path: /user/{email}
+          method: delete
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayCognitoAuthorizer
+  TimecardApi:
+    handler: api/handler.timecard
+    timeout: 20
+    memorySize: 1024
+    events:
+      - http:
+          path: /timecard
+          method: post
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayCognitoAuthorizer
+  TimecardByApiKeyApi:
+    handler: api/handler.timecardByApiKey
+    timeout: 20
+    memorySize: 1024
+    events:
+      - http:
+          path: /timecard-by-apikey
+          method: post
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+
+  ProvisionUser:
+    handler: commons/handler.provisionUser
+  IsProvisionedUser:
+    handler: commons/handler.isProvisionedUser
+  CreateUser:
+    handler: commons/handler.createUser
+  DeleteUser:
+    handler: commons/handler.deleteUser
+
+  ExecuteTimecardWorker:
+    timeout: 20
+    memorySize: 1024
+    handler: workers/handler.executeTimecard
+
+resources:
+  Resources:
+    ApiGatewayCognitoAuthorizer:
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        Name: Cognito
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        IdentitySource: method.request.header.Authorization
+        Type: COGNITO_USER_POOLS
+        ProviderARNs:
+          - Fn::Sub: arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${self:custom.environment.${self:provider.stage}.cognito_userpool_id}
+    GatewayResponseDefault4XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
+    GatewayResponseDefault5XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_5XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
+
+    UserTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: users
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    VironBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.environment.${self:provider.stage}.frontend_bucket}
+    VironBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket:
+          Ref: VironBucket
+        PolicyDocument:
+          Statement:
+            - Action: s3:GetObject
+              Effect: Allow
+              Resource:
+                Fn::Sub: arn:aws:s3:::${VironBucket}/*
+              Principal:
+                AWS:
+                  Fn::Sub: arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}
+    CloudFrontOriginAccessIdentity:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment:
+            Ref: AWS::StackName
+    VironCloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          PriceClass: PriceClass_100
+          Origins:
+            - Id: S3Origin
+              DomainName: ${self:custom.environment.${self:provider.stage}.frontend_bucket}.s3-ap-northeast-1.amazonaws.com
+              S3OriginConfig:
+                OriginAccessIdentity:
+                  Fn::Sub: origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}
+          Enabled: true
+          IPV6Enabled: false
+          DefaultRootObject: index.html
+          Comment:
+            Ref: AWS::StackName
+          DefaultCacheBehavior:
+            TargetOriginId: S3Origin
+            # Managed-CachingDisabled
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+            ViewerProtocolPolicy: redirect-to-https
+            Compress: true
+
+    SNSTopic:
+      Type: AWS::SNS::Topic
+      DeletionPolicy: Retain
+      Properties:
+        DisplayName: タイムカードボタン管理システム
+
+    SSMParameterKey:
+      Type: AWS::KMS::Key
+      DeletionPolicy: Retain
+      Properties:
+        KeyPolicy:
+          Version: '2012-10-17'
+          Id: SSMParameterKeyPolicy
+          Statement:
+            - Sid: Allow administration of the key
+              Effect: Allow
+              Principal:
+                AWS:
+                  - Fn::Sub: arn:aws:iam::${AWS::AccountId}:user/${self:custom.environment.${self:provider.stage}.kms_administrator_iam_user}
+              Action:
+                - kms:Create*
+                - kms:Describe*
+                - kms:Enable*
+                - kms:List*
+                - kms:Put*
+                - kms:Update*
+                - kms:Revoke*
+                - kms:Disable*
+                - kms:Get*
+                - kms:Delete*
+                - kms:ScheduleKeyDeletion
+                - kms:CancelKeyDeletion
+              Resource: '*'
+            - Sid: Allow use of the key
+              Effect: Allow
+              Principal:
+                Service: ssm.amazonaws.com
+                AWS:
+                  Fn::GetAtt: [IamRoleLambdaExecution, Arn]
+              Action:
+                - kms:Encrypt
+                - kms:Decrypt
+                - kms:ReEncrypt
+                - kms:GenerateDataKey*
+                - kms:DescribeKey
+              Resource: '*'
+
+    CreateUserSSMAutomation:
+      Type: AWS::SSM::Document
+      Properties:
+        Content: ${file(./runbooks/create-user.yml)}
+        DocumentType: Automation
+    DeleteUserSSMAutomation:
+      Type: AWS::SSM::Document
+      Properties:
+        Content: ${file(./runbooks/delete-user.yml)}
+        DocumentType: Automation
+
+  Outputs:
+    VironCloudFrontDistribution:
+      Description: Viron URL
+      Value:
+        Fn::GetAtt: [VironCloudFrontDistribution, DomainName]
+
+plugins:
+  - serverless-offline
+  - serverless-dynamodb-local
+  - serverless-s3-sync
+  - serverless-pseudo-parameters
+  - serverless-layers
+
+custom:
+  defaultStage: prod
+  environment:
+    prod: ${file(./env.prod.yml)}
+  serverless-layers:
+    packageManager: yarn
+    dependenciesPath: package.json
+    compatibleRuntimes: ['nodejs14.x']
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+      seed: true
+    seed:
+      dev:
+        sources:
+          - table: users
+            sources:
+              - ./migrations/users.json
+  s3Sync:
+    buckets:
+      - bucketName: ${self:custom.environment.${self:provider.stage}.frontend_bucket}
+        localDir: dist
+        deleteRemoved: true
