@@ -1,0 +1,9 @@
+[
+  {
+    "email": "hoge@example.com",
+    "api_key": "B6CD965F-E937-4C96-BA28-9D07EA25BD0E",
+    "kintai_username": "hoge",
+    "kintai_password_ssm_parameter_name": "/timecard-manager/users/ea703e7aa1efda0064eaa507d9e8ab7e/password",
+    "notification_arn": "arn:aws:sns:ap-northeast-1::/"
+  }
+]
