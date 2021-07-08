@@ -142,3 +142,7 @@ dist
 
 # AWS credentials
 credentials
+
+# Secrets
+env.dev.yml
+env.prod.yml

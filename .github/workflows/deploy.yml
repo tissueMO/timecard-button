@@ -32,5 +32,16 @@ jobs:
       - name: Install Node Packages
         run: yarn
 
+      - name: Inject Secrets
+        run: |
+          cat src/env.example.yml | \
+            sed -e 's/YOUR_COGNITO_USERPOOL_ID/${{ secrets.ENV_COGNITO_USERPOOL_ID }}/g' | \
+            sed -e 's;YOUR_COGNITO_USERPOOL_BASE_URL;${{ secrets.ENV_COGNITO_BASE_URL }};g' | \
+            sed -e 's/YOUR_COGNITO_USERPOOL_CLIENT_ID/${{ secrets.ENV_COGNITO_CLIENT_ID }}/g' | \
+            sed -e 's/YOUR_COGNITO_USERPOOL_CLIENT_SECRET/${{ secrets.ENV_COGNITO_CLIENT_SECRET }}/g' | \
+            sed -e 's/YOUR_ADMINISTRATOR_IAM_USER/${{ secrets.ENV_ADMINISTRATOR_IAM_USER }}/g' | \
+            sed -e 's;YOUR_KINTAI_WEBSITE_URL;${{ secrets.ENV_KINTAI_WEBSITE_URL }};g' \
+              > src/env.prod.yml
+
       - name: Build and Deploy
         run: yarn release:prod
