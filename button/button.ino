@@ -8,13 +8,8 @@ const char *password = PASSWORD;
 const char *host = HOSTNAME;
 const char *apiKey = API_KEY;
 const int port = PORT;
+const int CONNECTION_TIMEOUT_MILLIS = 5000;
 const int RESPONSE_TIMEOUT_MILLIS = 10000;
-
-#if PORT == 443
-  WiFiClientSecure client;
-#else
-  WiFiClient client;
-#endif
 
 // LCD描画設定
 const int displayBrightness = 10;
@@ -88,17 +83,23 @@ void loop()
  */
 void postTimecard()
 {
+#if PORT == 443
+  WiFiClientSecure client;
+#else
+  WiFiClient client;
+#endif
+
   clearLcd();
   M5.Lcd.println("Timecard: Connecting...");
   Serial.print("Connecting to ");
   Serial.println(host);
-  if (!client.connect(host, port))
+  if (!client.connect(host, port, CONNECTION_TIMEOUT_MILLIS))
   {
     // HTTP通信の確立に失敗
     Serial.println("Connection failed.");
 
     clearLcd();
-    M5.Lcd.println("Timecard: Connection failed.");
+    M5.Lcd.println("Timecard: Failed.");
     delay(3000);
     return;
   }
@@ -128,15 +129,15 @@ void postTimecard()
       client.stop();
 
       clearLcd();
-      M5.Lcd.println("Timecard: Connection timeout.");
+      M5.Lcd.println("Timecard: Timeout.");
       delay(3000);
       return;
     }
   }
 
   clearLcd();
-  M5.Lcd.println("Timecard: DONE.");
-  delay(3000);
+  M5.Lcd.println("Timecard: <<DONE>>");
+  delay(5000);
 }
 
 /**
