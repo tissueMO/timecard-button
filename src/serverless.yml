@@ -193,7 +193,7 @@ functions:
     memorySize: 1024
     events:
       - http:
-          path: /timecard-by-apikey
+          path: /timecard/{api_key}
           method: post
           integration: lambda-proxy
           cors:
