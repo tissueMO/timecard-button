@@ -30,18 +30,18 @@ module.exports = {
 
     const command = (buttons.length === 4) ? '出勤' : '退勤';
 
-    if (command === '出勤') {
-      console.info('出勤タイムカードを打刻します。');
-      await buttons.slice(0, 1).pop().click();
-    } else {
-      console.info('退勤タイムカードを打刻します。');
-      await buttons.slice(-1).pop().click();
-    }
+    // if (command === '出勤') {
+    //   console.info('出勤タイムカードを打刻します。');
+    //   await buttons.slice(0, 1).pop().click();
+    // } else {
+    //   console.info('退勤タイムカードを打刻します。');
+    //   await buttons.slice(-1).pop().click();
+    // }
 
-    // 画面が更新されるのを待つ
-    const newBodyFrameElement = await page.$('frame[name="bodyFrame"]');
-    const newBodyFrame = await newBodyFrameElement.contentFrame();
-    await newBodyFrame.waitForNavigation({ waitUntil: 'load' });
+    // // 画面が更新されるのを待つ
+    // const newBodyFrameElement = await page.$('frame[name="bodyFrame"]');
+    // const newBodyFrame = await newBodyFrameElement.contentFrame();
+    // await newBodyFrame.waitForNavigation({ waitUntil: 'load' });
 
     return command;
   },
