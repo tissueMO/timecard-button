@@ -370,7 +370,7 @@ module.exports.timecard = async (event) => {
 };
 
 module.exports.timecardByApiKey = async (event) => {
-  const apiKey = event.api_key;
+  const apiKey = qs.unescape(event.pathParameters.api_key);
 
   // APIキーからユーザーを逆引きする
   const user = (await dynamodb.scan({
