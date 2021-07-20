@@ -9,12 +9,12 @@ const char *host = HOSTNAME;
 const char *apiKey = API_KEY;
 const int port = PORT;
 const int CONNECTION_TIMEOUT_MILLIS = 5000;
-const int RESPONSE_TIMEOUT_MILLIS = 10000;
+const int RESPONSE_TIMEOUT_MILLIS = 20000;
 
 // LCD描画設定
 const int displayBrightness = 10;
 const int displayRotation = 1;
-const int displayTextSize = 1;
+const int displayTextSize = 2;
 
 // 関数プロトタイプ宣言
 void postTimecard();
@@ -33,7 +33,7 @@ void setup()
   M5.Lcd.setRotation(displayRotation);
   M5.Lcd.setTextSize(displayTextSize);
   M5.Lcd.fillScreen(BLACK);
-  M5.Lcd.println("Timecard Button");
+  M5.Lcd.print("Init...");
 
   // Wi-Fi 接続
   Serial.println();
@@ -52,12 +52,13 @@ void setup()
   Serial.println("Wi-Fi connected.");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-  M5.Lcd.print("IP address: ");
+  M5.Lcd.println("OK");
+  M5.Lcd.println("IP:");
   M5.Lcd.println(WiFi.localIP());
 
   delay(1000);
   clearLcd();
-  M5.Lcd.println("READY.");
+  M5.Lcd.println("TIMECARD");
 }
 
 /*
@@ -72,7 +73,7 @@ void loop()
     postTimecard();
 
     clearLcd();
-    M5.Lcd.println("READY.");
+    M5.Lcd.println("TIMECARD");
   }
 
   delay(1);
@@ -90,16 +91,14 @@ void postTimecard()
 #endif
 
   clearLcd();
-  M5.Lcd.println("Timecard: Connecting...");
+  M5.Lcd.println("TIMECARD...");
   Serial.print("Connecting to ");
   Serial.println(host);
   if (!client.connect(host, port, CONNECTION_TIMEOUT_MILLIS))
   {
     // HTTP通信の確立に失敗
     Serial.println("Connection failed.");
-
-    clearLcd();
-    M5.Lcd.println("Timecard: Failed.");
+    M5.Lcd.println("<<ERROR>>");
     delay(3000);
     return;
   }
@@ -125,19 +124,16 @@ void postTimecard()
   {
     if (millis() - requestedTime > RESPONSE_TIMEOUT_MILLIS)
     {
-      Serial.println("...Connection timeout.");
       client.stop();
-
-      clearLcd();
-      M5.Lcd.println("Timecard: Timeout.");
+      Serial.println("...Connection timeout.");
+      M5.Lcd.println("<<TIMEOUT>>");
       delay(3000);
       return;
     }
   }
 
-  clearLcd();
-  M5.Lcd.println("Timecard: <<DONE>>");
-  delay(5000);
+  M5.Lcd.println("<<DONE>>");
+  delay(3000);
 }
 
 /**
