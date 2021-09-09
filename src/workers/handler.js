@@ -17,7 +17,7 @@ const dynamodb = new aws.DynamoDB.DocumentClient(dbRegion ? {
 /**
  * 指定のユーザーとして勤怠システムにアクセスし、タイムカードを打刻します。
  */
-module.exports.executeTimecard = async (event) => {
+exports.executeTimecard = async (event) => {
   const {email, apiKey} = event;
 
   const user = (await dynamodb.get({
@@ -84,7 +84,7 @@ module.exports.executeTimecard = async (event) => {
 
     const result = {
       statusCode: 200,
-      result: timecardResult,
+      body: timecardResult,
     };
     console.info(result);
     return result;
@@ -109,7 +109,7 @@ module.exports.executeTimecard = async (event) => {
 
     const result = {
       statusCode: 500,
-      error: e,
+      body: e,
     };
     console.error(result);
     return result;

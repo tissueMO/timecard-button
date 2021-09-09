@@ -20,7 +20,7 @@ const dynamodb = new aws.DynamoDB.DocumentClient(dbRegion ? {
 /**
  * ユーザーを新規作成する準備としてSNSサブスクリプションの登録を行います。
  */
-module.exports.provisionUser = async (event) => {
+exports.provisionUser = async (event) => {
   const email = event.email;
 
   const subscriptionArn = (await sns.subscribe({
@@ -42,7 +42,7 @@ module.exports.provisionUser = async (event) => {
 /**
  * 指定されたユーザーの新規作成を開始できる状態にあるかどうかを返します。
  */
-module.exports.isProvisionedUser = async (event) => {
+exports.isProvisionedUser = async (event) => {
   const email = event.email;
 
   const subscriptionArn = (await sns.listSubscriptionsByTopic({ TopicArn: snsTopic }).promise())
@@ -61,7 +61,7 @@ module.exports.isProvisionedUser = async (event) => {
 /**
  * ユーザーを新規作成します。
  */
-module.exports.createUser = async (event) => {
+exports.createUser = async (event) => {
   const email = event.email;
   const subscriptionArn = (await this.isProvisionedUser(event)).subscriptionArn;
 
@@ -139,7 +139,7 @@ module.exports.createUser = async (event) => {
 /**
  * ユーザーを削除し、関連するリソースを削除します。
  */
-module.exports.deleteUser = async (event) => {
+exports.deleteUser = async (event) => {
   const email = event.email;
 
   const user = (await dynamodb.get({

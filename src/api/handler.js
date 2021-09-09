@@ -27,7 +27,7 @@ const dynamodb = new aws.DynamoDB.DocumentClient(dbRegion ? {
   endpoint: dbEndpoint,
 } : {});
 
-module.exports.vironAuthType = async () => ({
+exports.vironAuthType = async () => ({
   statusCode: 200,
   headers: {
     'Access-Control-Allow-Origin': '*',
@@ -51,7 +51,7 @@ module.exports.vironAuthType = async () => ({
 /**
  * サインインを行います。
  */
-module.exports.signIn = async (event) => ({
+exports.signIn = async (event) => ({
   statusCode: 302,
   headers: {
     'Access-Control-Allow-Origin': '*',
@@ -67,7 +67,7 @@ module.exports.signIn = async (event) => ({
 /**
  * サインアウトを行います。
  */
-module.exports.signOut = async () => ({
+exports.signOut = async () => ({
   statusCode: 302,
   headers: {
     'Access-Control-Allow-Origin': '*',
@@ -81,7 +81,7 @@ module.exports.signOut = async () => ({
 /**
  * 外部認証の結果を適切に処理し、ログインされた状態にします。
  */
-module.exports.oauth2Callback = async (event) => {
+exports.oauth2Callback = async (event) => {
   const authCode = event.queryStringParameters.code;
   const redirectUrl = Buffer.from(event.queryStringParameters.state, 'base64').toString();
 
@@ -129,7 +129,7 @@ module.exports.oauth2Callback = async (event) => {
   }
 };
 
-module.exports.swagger = async () => ({
+exports.swagger = async () => ({
   statusCode: 200,
   headers: {
     'Access-Control-Allow-Origin': '*',
@@ -143,7 +143,7 @@ module.exports.swagger = async () => ({
   )),
 });
 
-module.exports.viron = async () => ({
+exports.viron = async () => ({
   statusCode: 200,
   headers: {
     'Access-Control-Allow-Origin': '*',
@@ -183,7 +183,7 @@ module.exports.viron = async () => ({
   }),
 });
 
-module.exports.getUser = async (event) => {
+exports.getUser = async (event) => {
   // 処理の都合上JWTが必須
   const jwtPayload = event.headers.Authorization.split('.')[1];
   if (!jwtPayload) {
@@ -231,7 +231,7 @@ module.exports.getUser = async (event) => {
   };
 };
 
-module.exports.updateUser = async (event) => {
+exports.updateUser = async (event) => {
   const email = qs.unescape(event.pathParameters.email);
   const request = JSON.parse(event.body);
 
@@ -298,7 +298,7 @@ module.exports.updateUser = async (event) => {
   };
 };
 
-module.exports.deleteUser = async (event) => {
+exports.deleteUser = async (event) => {
   const email = qs.unescape(event.pathParameters.email);
 
   // 処理の都合上JWTが必須
@@ -339,7 +339,7 @@ module.exports.deleteUser = async (event) => {
   );
 };
 
-module.exports.timecard = async (event) => {
+exports.timecard = async (event) => {
   // 処理の都合上JWTが必須
   const jwtPayload = event.headers.Authorization.split('.')[1];
   if (!jwtPayload) {
@@ -365,11 +365,13 @@ module.exports.timecard = async (event) => {
     statusCode: 200,
     headers: {
       'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'text/plain',
     },
+    body: result.body ?? '',
   };
 };
 
-module.exports.timecardByApiKey = async (event) => {
+exports.timecardByApiKey = async (event) => {
   const apiKey = qs.unescape(event.pathParameters.api_key);
 
   // APIキーからユーザーを逆引きする
@@ -391,16 +393,15 @@ module.exports.timecardByApiKey = async (event) => {
   }
 
   // タイムカード打刻
-  const result = await workers.executeTimecard({
-    email: user.email,
-    apiKey,
-  });
+  const result = await workers.executeTimecard({ email: user.email, apiKey });
   console.log('タイムカード打刻結果:', result);
 
   return {
     statusCode: 200,
     headers: {
       'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'text/plain',
     },
+    body: result.body ?? '',
   };
 };
